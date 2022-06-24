@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+WORKDIR /src
+COPY ["Code/Managementservice.Api/Managementservice.Api.csproj", "Code/Managementservice.Api/"]
+COPY ["Code/Managementservice.Business/Managementservice.Business.csproj", "Code/Managementservice.Business/"]
+COPY ["Code/Managementservice.Data/Managementservice.Data.csproj", "Code/Managementservice.Data/"]
+COPY ["Code/Managementservice.Entities/Managementservice.Entities.csproj", "Code/Managementservice.Entities/"]
+COPY ["Code/Managementservice.Test.Api/Managementservice.Test.Api.csproj", "Code/Managementservice.Test.Api/"]
+COPY ["Code/Managementservice.Test.Business/Managementservice.Test.Business.csproj", "Code/Managementservice.Test.Business/"]
+RUN dotnet restore "Code/Managementservice.Api/Managementservice.Api.csproj"
+COPY . .
+WORKDIR "/src/Code/Managementservice.Api"
+RUN dotnet build "Managementservice.Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Managementservice.Api.csproj" -c Release -o /app/publish
+
+WORKDIR /src
+RUN dotnet test --results-directory /testresults --logger "trx;LogFileName=testresults.Api.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=/testresults/coverage/ /p:MergeWith=/testresults/coverage/coverage.json "Code/Managementservice.Test.Api/Managementservice.Test.Api.csproj"
+RUN dotnet test --results-directory /testresults --logger "trx;LogFileName=testresults.Api.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=/testresults/coverage/ /p:MergeWith=/testresults/coverage/coverage.json "Code/Managementservice.Test.Business/Managementservice.Test.Business.csproj"
