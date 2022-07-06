@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+WORKDIR /src
+COPY ["Code/iam-service.Api/iam-service.Api.csproj", "Code/iam-service.Api/"]
+COPY ["Code/iam-service.Business/iam-service.Business.csproj", "Code/iam-service.Business/"]
+COPY ["Code/iam-service.Data/iam-service.Data.csproj", "Code/iam-service.Data/"]
+COPY ["Code/iam-service.Entities/iam-service.Entities.csproj", "Code/iam-service.Entities/"]
+COPY ["Code/iam-service.Test.Api/iam-service.Test.Api.csproj", "Code/iam-service.Test.Api/"]
+COPY ["Code/iam-service.Test.Business/iam-service.Test.Business.csproj", "Code/iam-service.Test.Business/"]
+RUN dotnet restore "Code/iam-service.Api/iam-service.Api.csproj"
+COPY . .
+WORKDIR "/src/Code/iam-service.Api"
+RUN dotnet build "iam-service.Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "iam-service.Api.csproj" -c Release -o /app/publish
+
+WORKDIR /src
+RUN dotnet test --results-directory /testresults --logger "trx;LogFileName=testresults.Api.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=/testresults/coverage/ /p:MergeWith=/testresults/coverage/coverage.json "Code/iam-service.Test.Api/iam-service.Test.Api.csproj"
+RUN dotnet test --results-directory /testresults --logger "trx;LogFileName=testresults.Api.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=/testresults/coverage/ /p:MergeWith=/testresults/coverage/coverage.json "Code/iam-service.Test.Business/iam-service.Test.Business.csproj"
