@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+WORKDIR /src
+COPY ["Code/codegen-service.Api/codegen-service.Api.csproj", "Code/codegen-service.Api/"]
+COPY ["Code/codegen-service.Business/codegen-service.Business.csproj", "Code/codegen-service.Business/"]
+COPY ["Code/codegen-service.Data/codegen-service.Data.csproj", "Code/codegen-service.Data/"]
+COPY ["Code/codegen-service.Entities/codegen-service.Entities.csproj", "Code/codegen-service.Entities/"]
+COPY ["Code/codegen-service.Test.Api/codegen-service.Test.Api.csproj", "Code/codegen-service.Test.Api/"]
+COPY ["Code/codegen-service.Test.Business/codegen-service.Test.Business.csproj", "Code/codegen-service.Test.Business/"]
+RUN dotnet restore "Code/codegen-service.Api/codegen-service.Api.csproj"
+COPY . .
+WORKDIR "/src/Code/codegen-service.Api"
+RUN dotnet build "codegen-service.Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "codegen-service.Api.csproj" -c Release -o /app/publish
+
+WORKDIR /src
+RUN dotnet test --results-directory /testresults --logger "trx;LogFileName=testresults.Api.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=/testresults/coverage/ /p:MergeWith=/testresults/coverage/coverage.json "Code/codegen-service.Test.Api/codegen-service.Test.Api.csproj"
+RUN dotnet test --results-directory /testresults --logger "trx;LogFileName=testresults.Api.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=/testresults/coverage/ /p:MergeWith=/testresults/coverage/coverage.json "Code/codegen-service.Test.Business/codegen-service.Test.Business.csproj"
