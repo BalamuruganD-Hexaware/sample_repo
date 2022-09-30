@@ -66,6 +66,6 @@ jobs:
       - name: deploy
         uses: azure/webapps-deploy@v2
         with:
-          app-name: gzofPI7
-          publish-profile: ${{ secrets.AZURE_gzofPI7_PUBLISH_PROFILE }}
+          app-name: KOjwg2j
+          publish-profile: ${{ secrets.AZURE_KOjwg2j_PUBLISH_PROFILE }}
           images: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.REPOSITORY }}:${{needs.set-environment.outputs.run_number}}
