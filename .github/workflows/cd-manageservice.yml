@@ -13,8 +13,6 @@ name: cd-manageservice
     workflows: manageservice
     branches:
       - main
-      - main
-      - main
     paths: manageservice
     types: completed
 env:
@@ -31,32 +29,6 @@ jobs:
           echo ENVIRONMENT=main>> $GITHUB_ENV
           echo "RUN_NUMBER=${{github.event.workflow_run.run_number}}" >> $GITHUB_ENV
           echo "BRANCH_NAME=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
-      - if: Set main env
-        name: |
-          github.event.inputs.environment == '' && contains(github.event.workflow_run.head_branch, main)
-        run: |-
-          echo ENVIRONMENT=main>> $GITHUB_ENV
-          echo "RUN_NUMBER=${{github.event.workflow_run.run_number}}" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
-      - if: Set main env
-        name: |
-          github.event.inputs.environment == '' && contains(github.event.workflow_run.head_branch, main)
-        run: |-
-          echo ENVIRONMENT=main>> $GITHUB_ENV
-          echo "RUN_NUMBER=${{github.event.workflow_run.run_number}}" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
-      - if: |
-          github.event.inputs.environment == main
-        run: |
-          echo ENVIRONMENT=main>> $GITHUB_ENV
-          echo "RUN_NUMBER=${{github.event.inputs.run_number}}" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
-      - if: |
-          github.event.inputs.environment == main
-        run: |
-          echo ENVIRONMENT=main>> $GITHUB_ENV
-          echo "RUN_NUMBER=${{github.event.inputs.run_number}}" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
       - if: |
           github.event.inputs.environment == main
         run: |
@@ -91,6 +63,6 @@ jobs:
       - name: deploy
         uses: azure/webapps-deploy@v2
         with:
-          app-name: aSbuxnk
-          publish-profile: ${{ secrets.AZURE_aSbuxnk_PUBLISH_PROFILE }}
+          app-name: YdpQcEf
+          publish-profile: ${{ secrets.AZURE_YdpQcEf_PUBLISH_PROFILE }}
           images: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.REPOSITORY }}:${{needs.set-environment.outputs.run_number}}
