@@ -63,6 +63,6 @@ jobs:
       - name: deploy
         uses: azure/webapps-deploy@v2
         with:
-          app-name: YdpQcEf
-          publish-profile: ${{ secrets.AZURE_YdpQcEf_PUBLISH_PROFILE }}
+          app-name: XSPJ327
+          publish-profile: ${{ secrets.AZURE_XSPJ327_PUBLISH_PROFILE }}
           images: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.REPOSITORY }}:${{needs.set-environment.outputs.run_number}}
