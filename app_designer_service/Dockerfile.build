@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+WORKDIR /src
+COPY ["Code/app_designer_service.Api/app_designer_service.Api.csproj", "Code/app_designer_service.Api/"]
+COPY ["Code/app_designer_service.Business/app_designer_service.Business.csproj", "Code/app_designer_service.Business/"]
+COPY ["Code/app_designer_service.Data/app_designer_service.Data.csproj", "Code/app_designer_service.Data/"]
+COPY ["Code/app_designer_service.Entities/app_designer_service.Entities.csproj", "Code/app_designer_service.Entities/"]
+COPY ["Code/app_designer_service.Test.Api/app_designer_service.Test.Api.csproj", "Code/app_designer_service.Test.Api/"]
+COPY ["Code/app_designer_service.Test.Business/app_designer_service.Test.Business.csproj", "Code/app_designer_service.Test.Business/"]
+RUN dotnet restore "Code/app_designer_service.Api/app_designer_service.Api.csproj"
+COPY . .
+WORKDIR "/src/Code/app_designer_service.Api"
+RUN dotnet build "app_designer_service.Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "app_designer_service.Api.csproj" -c Release -o /app/publish
+
+WORKDIR /src
+RUN dotnet test --results-directory /testresults --logger "trx;LogFileName=testresults.Api.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=/testresults/coverage/ /p:MergeWith=/testresults/coverage/coverage.json "Code/app_designer_service.Test.Api/app_designer_service.Test.Api.csproj"
+RUN dotnet test --results-directory /testresults --logger "trx;LogFileName=testresults.Api.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=/testresults/coverage/ /p:MergeWith=/testresults/coverage/coverage.json "Code/app_designer_service.Test.Business/app_designer_service.Test.Business.csproj"
